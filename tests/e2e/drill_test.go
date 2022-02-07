@@ -55,11 +55,10 @@ var _ = Describe("end to end test", func() {
 		})
 		It("Should leave one successful pod that actually fetched kubernetes.io", func() {
 			inNamespace := ctrlclient.InNamespace(e2eNamespaceDrill)
-			matchingLabel := ctrlclient.MatchingLabels{
-				"job-name": "drill-sample",
-			}
 			podList := &corev1.PodList{}
-			Expect(client.List(ctx, podList, inNamespace, matchingLabel)).To(Succeed())
+			Expect(client.List(ctx, podList, inNamespace, ctrlclient.MatchingLabels(map[string]string{
+				"job-name": "drill-sample",
+			}))).To(Succeed())
 			Expect(len(podList.Items)).To(Equal(1))
 			pod := podList.Items[0]
 

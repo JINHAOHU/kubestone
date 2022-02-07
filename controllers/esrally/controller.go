@@ -18,6 +18,7 @@ package esrally
 
 import (
 	"context"
+
 	"github.com/xridge/kubestone/api/v1alpha1"
 	"github.com/xridge/kubestone/pkg/k8s"
 	corev1 "k8s.io/api/core/v1"
@@ -43,8 +44,7 @@ type Reconciler struct {
 // +kubebuilder:rbac:groups=perf.kubestone.xridge.io,resources=esrallies/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=perf.kubestone.xridge.io,resources=esrallies/finalizers,verbs=update
 
-func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	logger := r.Log.WithValues("esrally", req.NamespacedName)
 
 	var cr perfv1alpha1.EsRally

@@ -18,9 +18,10 @@ package main
 
 import (
 	"flag"
+	"os"
+
 	"github.com/xridge/kubestone/controllers/esrally"
 	"github.com/xridge/kubestone/controllers/ocplogtest"
-	"os"
 
 	"github.com/xridge/kubestone/controllers/ycsbbench"
 
@@ -48,7 +49,7 @@ import (
 
 var (
 	scheme   = runtime.NewScheme()
-	rootLog  = zap.RawLoggerTo(os.Stderr, true)
+	rootLog  = zap.NewRaw(zap.WriteTo(os.Stderr), zap.UseDevMode(true))
 	setupLog = ctrl.Log.WithName("setup")
 )
 

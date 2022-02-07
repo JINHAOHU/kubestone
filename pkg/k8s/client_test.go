@@ -90,7 +90,7 @@ var _ = Describe("Client", func() {
 				Expect(err).NotTo(HaveOccurred())
 
 				By("check the created pod")
-				actual, err := clientset.CoreV1().Pods(pod.Namespace).Get(pod.Name, metav1.GetOptions{})
+				actual, err := clientset.CoreV1().Pods(pod.Namespace).Get(context.TODO(), pod.Name, metav1.GetOptions{})
 				Expect(err).NotTo(HaveOccurred())
 				Expect(actual).NotTo(BeNil())
 				Expect(pod).To(Equal(actual))
@@ -101,7 +101,7 @@ var _ = Describe("Client", func() {
 
 				By("check the created event")
 				Eventually(func() []corev1.Event {
-					eventList, err := clientset.CoreV1().Events(pod.Namespace).List(metav1.ListOptions{})
+					eventList, err := clientset.CoreV1().Events(pod.Namespace).List(context.TODO(), metav1.ListOptions{})
 					Expect(err).NotTo(HaveOccurred())
 					Expect(eventList).NotTo(BeNil())
 

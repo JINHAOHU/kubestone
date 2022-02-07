@@ -22,7 +22,7 @@ GOLANGCI_VERSION = v1.21.0
 all: manager
 
 # Run unit tests
-test: generate fmt lint manifests
+test: generate fmt manifests
 	go test -v ./api/... ./controllers/... ./pkg/... -coverprofile cover.out
 
 # Run end to end tests

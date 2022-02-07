@@ -18,6 +18,7 @@ package ycsbbench
 
 import (
 	"context"
+
 	"github.com/xridge/kubestone/pkg/k8s"
 	"k8s.io/apimachinery/pkg/types"
 
@@ -37,8 +38,7 @@ type Reconciler struct {
 // +kubebuilder:rbac:groups=perf.kubestone.xridge.io,resources=ycsbbenches/finalizers,verbs=update
 
 //
-func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = r.Log.WithValues("ycsbbench", req.NamespacedName)
 
 	var cr perfv1alpha1.YcsbBench

@@ -19,6 +19,7 @@ package k8s
 import (
 	"context"
 	"fmt"
+
 	v1 "k8s.io/api/apps/v1"
 	batchv1 "k8s.io/api/batch/v1"
 
@@ -67,16 +68,16 @@ func (a *Access) RecordEventf(object metav1.Object, eventtype, reason, messageFm
 // Successful creation of the event is logged via EventRecorder
 // to the owner.
 func (a *Access) CreateWithReference(ctx context.Context, object, owner metav1.Object) error {
-	runtimeObject, ok := object.(runtime.Object)
+	clientObject, ok := object.(client.Object)
 	if !ok {
-		return fmt.Errorf("object (%T) is not a runtime.Object", object)
+		return fmt.Errorf("object (%T) is not a client.Object", object)
 	}
 
 	if err := controllerutil.SetControllerReference(owner, object, a.Scheme); err != nil {
 		return err
 	}
 
-	err := a.Client.Create(ctx, runtimeObject)
+	err := a.Client.Create(ctx, clientObject)
 	if IgnoreAlreadyExists(err) != nil {
 		return err
 	}
@@ -94,9 +95,9 @@ func (a *Access) CreateWithReference(ctx context.Context, object, owner metav1.O
 // Successful deletion of the event is logged via EventRecorder
 // to the owner.
 func (a *Access) DeleteObject(ctx context.Context, object, owner metav1.Object) error {
-	runtimeObject, ok := object.(runtime.Object)
+	clientObject, ok := object.(client.Object)
 	if !ok {
-		return fmt.Errorf("object (%T) is not a runtime.Object", object)
+		return fmt.Errorf("object (%T) is not a client.Object", object)
 	}
 
 	// Need to get the object first so that the object.GetSelfLink()
@@ -105,14 +106,14 @@ func (a *Access) DeleteObject(ctx context.Context, object, owner metav1.Object) 
 		Namespace: object.GetNamespace(),
 		Name:      object.GetName(),
 	}
-	err := a.Client.Get(ctx, namespacedName, runtimeObject)
+	err := a.Client.Get(ctx, namespacedName, clientObject)
 	if IgnoreNotFound(err) != nil {
 		return err
 	} else if errors.IsNotFound(err) {
 		return nil
 	}
 
-	err = a.Client.Delete(ctx, runtimeObject)
+	err = a.Client.Delete(ctx, clientObject)
 	if IgnoreNotFound(err) != nil {
 		return err
 	}
@@ -127,8 +128,7 @@ func (a *Access) DeleteObject(ctx context.Context, object, owner metav1.Object) 
 
 // IsJobFinished returns true if the given job has already succeeded or failed
 func (a *Access) IsJobFinished(namespacedName types.NamespacedName) (finished bool, err error) {
-	job, err := a.Clientset.BatchV1().Jobs(namespacedName.Namespace).Get(
-		namespacedName.Name, metav1.GetOptions{})
+	job, err := a.Clientset.BatchV1().Jobs(namespacedName.Namespace).Get(context.TODO(), namespacedName.Name, metav1.GetOptions{})
 	if err != nil {
 		return false, err
 	}
@@ -138,8 +138,7 @@ func (a *Access) IsJobFinished(namespacedName types.NamespacedName) (finished bo
 }
 
 func (a *Access) GetJob(namespacedName types.NamespacedName) *batchv1.Job {
-	job, err := a.Clientset.BatchV1().Jobs(namespacedName.Namespace).Get(
-		namespacedName.Name, metav1.GetOptions{})
+	job, err := a.Clientset.BatchV1().Jobs(namespacedName.Namespace).Get(context.TODO(), namespacedName.Name, metav1.GetOptions{})
 	if err != nil {
 		return nil
 	}
@@ -147,18 +146,14 @@ func (a *Access) GetJob(namespacedName types.NamespacedName) *batchv1.Job {
 }
 
 func (a *Access) GetJobPods(namespacedName types.NamespacedName) (*corev1.PodList, error) {
-	job, err := a.Clientset.BatchV1().Jobs(namespacedName.Namespace).Get(
-		namespacedName.Name, metav1.GetOptions{})
+	job, err := a.Clientset.BatchV1().Jobs(namespacedName.Namespace).Get(context.TODO(), namespacedName.Name, metav1.GetOptions{})
 	if err != nil {
 		return nil, nil
 	}
 
 	uid := job.Labels["controller-uid"]
 
-	return a.Clientset.CoreV1().Pods(namespacedName.Namespace).List(
-		metav1.ListOptions{
-			LabelSelector: fmt.Sprintf("%s=%s", "controller-uid", uid),
-		})
+	return a.Clientset.CoreV1().Pods(namespacedName.Namespace).List(context.TODO(), metav1.ListOptions{LabelSelector: fmt.Sprintf("%s=%s", "controller-uid", uid)})
 }
 
 // +kubebuilder:rbac:groups="",resources=endpoints,verbs=get;list
@@ -172,8 +167,7 @@ func (a *Access) IsEndpointReady(namespacedName types.NamespacedName) (finished 
 	//
 	// Even though it is not enough to wait for the endpoints in certain cloud providers,
 	// it is still the closest we can get between service creation and connectibility.
-	endpoint, err := a.Clientset.CoreV1().Endpoints(namespacedName.Namespace).Get(
-		namespacedName.Name, metav1.GetOptions{})
+	endpoint, err := a.Clientset.CoreV1().Endpoints(namespacedName.Namespace).Get(context.TODO(), namespacedName.Name, metav1.GetOptions{})
 	if err != nil {
 		return false, err
 	}
@@ -194,8 +188,7 @@ func (a *Access) IsEndpointReady(namespacedName types.NamespacedName) (finished 
 // IsDeploymentReady returns true if the given deployment's ready replicas matching with the desired replicas
 func (a *Access) IsDeploymentReady(namespacedName types.NamespacedName) (ready bool, err error) {
 	ready, err = false, nil
-	deployment, err := a.Clientset.AppsV1().Deployments(namespacedName.Namespace).Get(
-		namespacedName.Name, metav1.GetOptions{})
+	deployment, err := a.Clientset.AppsV1().Deployments(namespacedName.Namespace).Get(context.TODO(), namespacedName.Name, metav1.GetOptions{})
 	if err != nil {
 		return ready, err
 	}
@@ -208,8 +201,7 @@ func (a *Access) IsDeploymentReady(namespacedName types.NamespacedName) (ready b
 // IsStatefulSetReady returns true if the given deployment's ready replicas matching with the desired replicas
 func (a *Access) IsStatefulSetReady(namespacedName types.NamespacedName) (set *v1.StatefulSet, ready bool, err error) {
 	ready, err = false, nil
-	statefulSet, err := a.Clientset.AppsV1().StatefulSets(namespacedName.Namespace).Get(
-		namespacedName.Name, metav1.GetOptions{})
+	statefulSet, err := a.Clientset.AppsV1().StatefulSets(namespacedName.Namespace).Get(context.TODO(), namespacedName.Name, metav1.GetOptions{})
 	if err != nil {
 		return set, ready, err
 	}
@@ -220,8 +212,7 @@ func (a *Access) IsStatefulSetReady(namespacedName types.NamespacedName) (set *v
 }
 
 func (a *Access) GetStatefulSet(namespacedName types.NamespacedName) *v1.StatefulSet {
-	statefulSet, err := a.Clientset.AppsV1().StatefulSets(namespacedName.Namespace).Get(
-		namespacedName.Name, metav1.GetOptions{})
+	statefulSet, err := a.Clientset.AppsV1().StatefulSets(namespacedName.Namespace).Get(context.TODO(), namespacedName.Name, metav1.GetOptions{})
 
 	if err != nil {
 		return statefulSet

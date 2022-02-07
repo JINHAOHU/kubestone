@@ -18,6 +18,7 @@ package kafkabench
 
 import (
 	"context"
+
 	"github.com/go-logr/logr"
 	perfv1alpha1 "github.com/xridge/kubestone/api/v1alpha1"
 	"github.com/xridge/kubestone/pkg/k8s"
@@ -38,8 +39,7 @@ type KafkaBenchReconciler struct {
 // +kubebuilder:rbac:groups=perf.kubestone.xridge.io,resources=kafkabenches/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups="",resources=pods,verbs=get;list;create;delete
 
-func (r *KafkaBenchReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
+func (r *KafkaBenchReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = r.Log.WithValues("kafkabench", req.NamespacedName)
 
 	var cr perfv1alpha1.KafkaBench

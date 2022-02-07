@@ -18,6 +18,7 @@ package ocplogtest
 
 import (
 	"context"
+
 	"github.com/xridge/kubestone/pkg/k8s"
 	"k8s.io/apimachinery/pkg/types"
 
@@ -36,9 +37,7 @@ type Reconciler struct {
 // +kubebuilder:rbac:groups=perf.kubestone.xridge.io,resources=ocplogtests/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=perf.kubestone.xridge.io,resources=ocplogtests/finalizers,verbs=update
 
-func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
-	ctx := context.Background()
-
+func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	var cr perfv1alpha1.OcpLogtest
 	if err := r.K8S.Client.Get(ctx, req.NamespacedName, &cr); err != nil {
 		return ctrl.Result{}, k8s.IgnoreNotFound(err)
