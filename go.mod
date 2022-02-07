@@ -1,4 +1,4 @@
-module github.com/yayaha/kubestone
+module github.com/xridge/kubestone
 
 go 1.12
 
