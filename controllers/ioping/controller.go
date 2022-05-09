@@ -40,8 +40,9 @@ type Reconciler struct {
 // +kubebuilder:rbac:groups=perf.kubestone.xridge.io,resources=iopings/finalizers,verbs=update
 
 // Reconcile creates ioping job based on the custom resource
-func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var cr perfv1alpha1.Ioping
+	ctx := context.Background()
 	if err := r.K8S.Client.Get(ctx, req.NamespacedName, &cr); err != nil {
 		return ctrl.Result{}, k8s.IgnoreNotFound(err)
 	}

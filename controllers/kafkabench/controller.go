@@ -39,9 +39,10 @@ type KafkaBenchReconciler struct {
 // +kubebuilder:rbac:groups=perf.kubestone.xridge.io,resources=kafkabenches/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups="",resources=pods,verbs=get;list;create;delete
 
-func (r *KafkaBenchReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *KafkaBenchReconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	_ = r.Log.WithValues("kafkabench", req.NamespacedName)
 
+	ctx := context.Background()
 	var cr perfv1alpha1.KafkaBench
 
 	if err := r.K8S.Client.Get(ctx, req.NamespacedName, &cr); err != nil {

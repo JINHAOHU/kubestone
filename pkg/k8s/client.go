@@ -68,7 +68,7 @@ func (a *Access) RecordEventf(object metav1.Object, eventtype, reason, messageFm
 // Successful creation of the event is logged via EventRecorder
 // to the owner.
 func (a *Access) CreateWithReference(ctx context.Context, object, owner metav1.Object) error {
-	clientObject, ok := object.(client.Object)
+	clientObject, ok := object.(runtime.Object)
 	if !ok {
 		return fmt.Errorf("object (%T) is not a client.Object", object)
 	}
@@ -95,7 +95,7 @@ func (a *Access) CreateWithReference(ctx context.Context, object, owner metav1.O
 // Successful deletion of the event is logged via EventRecorder
 // to the owner.
 func (a *Access) DeleteObject(ctx context.Context, object, owner metav1.Object) error {
-	clientObject, ok := object.(client.Object)
+	clientObject, ok := object.(runtime.Object)
 	if !ok {
 		return fmt.Errorf("object (%T) is not a client.Object", object)
 	}

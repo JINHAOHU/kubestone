@@ -44,10 +44,11 @@ type Reconciler struct {
 // +kubebuilder:rbac:groups=perf.kubestone.xridge.io,resources=esrallies/status,verbs=get;update;patch
 // +kubebuilder:rbac:groups=perf.kubestone.xridge.io,resources=esrallies/finalizers,verbs=update
 
-func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	logger := r.Log.WithValues("esrally", req.NamespacedName)
 
 	var cr perfv1alpha1.EsRally
+	ctx := context.Background()
 	if err := r.K8S.Client.Get(ctx, req.NamespacedName, &cr); err != nil {
 		return ctrl.Result{}, k8s.IgnoreNotFound(err)
 	}

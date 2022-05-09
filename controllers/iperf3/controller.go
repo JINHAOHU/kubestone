@@ -45,8 +45,9 @@ type Reconciler struct {
 // The creation of iperf3 client pod is postponed until the server
 // deployment completes. Once the iperf3 client pod is completed,
 // the server deployment and service objects are removed from k8s.
-func (r *Reconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
+func (r *Reconciler) Reconcile(req ctrl.Request) (ctrl.Result, error) {
 	var cr perfv1alpha1.Iperf3
+	ctx := context.Background()
 	if err := r.K8S.Client.Get(ctx, req.NamespacedName, &cr); err != nil {
 		return ctrl.Result{}, k8s.IgnoreNotFound(err)
 	}
